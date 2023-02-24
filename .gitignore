@@ -30,3 +30,5 @@ scripts/*.pyc
 selenium_standalone_zips
 driver_zips
 driver
+node_modules
+frontend/generated/

@@ -14,7 +14,7 @@ public class CssVariableSetter {
      * @param value value to set in the CSS variable
      */
     public static void setCssVariable(UI ui, String variableName, String value) {
-        ui.getPage().executeJavaScript(
+        ui.getPage().executeJs(
                 String.format("document.documentElement.style.setProperty('%s','%s');", variableName, value));
     }
 

@@ -3,16 +3,24 @@
 
     <groupId>org.vaadin.olli</groupId>
     <artifactId>cssvariablesetter</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
     <name>CssVariableSetter</name>
-    <description>Vaadin 10 Java API for setting CSS variables</description>
+    <description>Vaadin 24 Java API for setting CSS variables</description>
 
     <properties>
-        <vaadin.version>10.0.9</vaadin.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <vaadin.version>24.0.0.beta4</vaadin.version>
+
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Plugins -->
+        <frontend.maven.plugin.version>1.6</frontend.maven.plugin.version>
+        <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
+        <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
+        <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
+        <maven.surefire.plugin.version>2.21.0</maven.surefire.plugin.version>
     </properties>
     <organization>
         <name>Olli Tietäväinen</name>
@@ -20,7 +28,7 @@
     <licenses>
         <license>
             <name>Apache 2</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -39,12 +47,12 @@
     <repositories>
         <repository>
             <id>Vaadin Directory</id>
-            <url>http://maven.vaadin.com/vaadin-addons</url>
+            <url>https://maven.vaadin.com/vaadin-addons</url>
         </repository>
         <!-- Repository needed for prerelease versions of Vaadin -->
         <repository>
             <id>Vaadin prereleases</id>
-            <url>http://maven.vaadin.com/vaadin-prereleases</url>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
         </repository>
         <!-- The bintray repository contain webjars immediately after generation. If the webjar is available
              in Maven central, you do not need this repository -->
@@ -53,7 +61,14 @@
             <url>https://dl.bintray.com/webjars/maven</url>
         </repository>
     </repositories>
-
+    <pluginRepositories>
+        <pluginRepository>
+            <id>vaadin-prereleases</id>
+            <url>
+                https://maven.vaadin.com/vaadin-prereleases/
+            </url>
+        </pluginRepository>
+    </pluginRepositories>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -64,10 +79,39 @@
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>
+        <!-- The `pluginManagement` section allows listing plugin versions and
+      their global configuration in one place. -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven.resources.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>${maven.war.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin-maven-plugin</artifactId>
+                    <version>${vaadin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven.surefire.plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -89,21 +133,26 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.11.v20180605</version>
+                <version>11.0.13</version>
                 <configuration>
-                    <scanIntervalSeconds>-1</scanIntervalSeconds>
-                    <!-- Use test scope because the UI/demo classes are in 
-                        the test package. -->
                     <useTestScope>true</useTestScope>
                     <supportedPackagings>
-                    <supportedPackaging>jar</supportedPackaging>
+                        <supportedPackaging>jar</supportedPackaging>
                     </supportedPackagings>
-                    <webAppConfig>
-                        <!-- This is only needed to be able to unzip webjars 
-                            directly into src/test/webjar-debug and modify them for testing -->
-                        <resourceBase>src/test/webjar-debug/META-INF/resources</resourceBase>
-                    </webAppConfig>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-maven-plugin</artifactId>
+                <configuration>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-frontend</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -116,7 +165,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.1.0</version>
+                        <version>3.4.2</version>
                         <configuration>
                             <appendAssemblyId>false</appendAssemblyId>
                             <descriptors>
@@ -148,20 +197,13 @@
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.0.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <version>3.1.2</version>
                         <configuration>
-                            <quiet>true</quiet>
-                            <additionalparam>-Xdoclint:none</additionalparam>
+                            <!-- Generated file that shouldn't be included in add-ons -->
+                            <excludes>
+                                <exclude>META-INF/VAADIN/config/flow-build-info.json</exclude>
+                            </excludes>
                         </configuration>
                     </plugin>
                 </plugins>
